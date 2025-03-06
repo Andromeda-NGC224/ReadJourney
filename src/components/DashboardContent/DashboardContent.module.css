@@ -1,0 +1,19 @@
+.dashboardContainer {
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.filterContainer {
+  margin-bottom: 20px;
+}
+
+.deactivatedRow {
+  background-color: #f5f5f5;
+  opacity: 0.7;
+}
