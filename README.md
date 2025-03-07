@@ -26,11 +26,11 @@ ReadJourney is a book list management application developed to manage a collecti
 1. Clone the repository.
 2. Navigate to the project directory.
 3. Install dependencies:
- - npm install
-4. Run the Server: Start the server with:
- - npm run server
-5. Run the Frontend: You can run the Frontend via the [link](https://read-journey-delta.vercel.app/) or locally by entering the command in the console:
- - npm run dev
+   - npm install
+5. Run the Server: Start the server with:
+   - npm run server
+6. Run the Frontend: You can run the Frontend via the [link](https://read-journey-delta.vercel.app/) or locally by entering the command in the console:
+   - npm run dev
 This will launch the project locally at http://localhost:5173.
 
 ## 🚀 Additional Notes:
