@@ -1,0 +1,26 @@
+.footer {
+  text-align: center;
+  padding: 15px;
+  background-color: var(--secondary-color);
+  border-top: 1px solid var(--border-color);
+}
+
+.footerContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.footerLink {
+  font-size: 22px;
+  color: var(--highlight-color);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.3s ease;
+}
+
+.footerLink:hover {
+  color: var(--text-color);
+}

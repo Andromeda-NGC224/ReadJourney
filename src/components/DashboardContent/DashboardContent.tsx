@@ -1,73 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { Table, Button, Select, Space, Typography, message } from "antd";
 import {
-  Table,
-  Button,
-  Select,
-  Space,
-  Typography,
-  message,
-  Popconfirm,
-  Tag,
-} from "antd";
-import {
-  EditOutlined,
-  DeleteOutlined,
   PlusOutlined,
-  CheckCircleOutlined,
-  StopOutlined,
+  FilterOutlined,
+  BookOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
-import { format } from "date-fns";
-import { Link, useNavigate } from "react-router-dom";
-import { Book } from "../../types/Book.ts";
-import {
-  getAllBooks,
-  getActiveBooks,
-  getDeactivatedBooks,
-  toggleBookStatus,
-  deleteBook,
-} from "../../services/bookService.ts";
+import { Link } from "react-router-dom";
+import { useBookContext } from "../../globalContext/BookContext.tsx";
+import { FilterType } from "../../types/Book";
+import { useColumns } from "./columns/useColumns.tsx";
+
 import css from "./DashboardContent.module.css";
 
-const { Option } = Select;
-const { Title } = Typography;
-
-type FilterType = "all" | "active" | "deactivated";
-
 const DashboardContent: React.FC = () => {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [filter, setFilter] = useState<FilterType>("active");
-  const [totalBooks, setTotalBooks] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(true);
-  const navigate = useNavigate();
+  const {
+    books,
+    totalBooks,
+    loading,
+    filter,
+    setFilter,
+    toggleBookStatus,
+    deleteBook,
+  } = useBookContext();
 
-  const fetchBooks = async () => {
-    setLoading(true);
-    try {
-      const allBooks = await getAllBooks();
-      setTotalBooks(allBooks.length);
+  const [messageApi, contextHolder] = message.useMessage();
 
-      let filteredBooks: Book[];
-      switch (filter) {
-        case "active":
-          filteredBooks = await getActiveBooks();
-          break;
-        case "deactivated":
-          filteredBooks = await getDeactivatedBooks();
-          break;
-        default:
-          filteredBooks = allBooks;
-      }
-      setBooks(filteredBooks);
-    } catch (error) {
-      message.error("Помилка при завантаженні даних");
-    } finally {
-      setLoading(false);
-    }
+  const successMessage = (content: string) => {
+    messageApi.open({
+      type: "success",
+      content,
+    });
   };
 
-  useEffect(() => {
-    fetchBooks();
-  }, [filter]);
+  const errorMessage = (content: string) => {
+    messageApi.open({
+      type: "error",
+      content,
+    });
+  };
 
   const handleFilterChange = (value: FilterType) => {
     setFilter(value);
@@ -76,133 +47,64 @@ const DashboardContent: React.FC = () => {
   const handleToggleStatus = async (id: string) => {
     try {
       await toggleBookStatus(id);
-      message.success("Статус книги успішно змінено");
-      fetchBooks();
+      successMessage("Book status changed successfully");
     } catch (error) {
-      message.error("Помилка при зміні статусу книги");
+      errorMessage("Error changing book status");
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteBook(id);
-      message.success("Книгу успішно видалено");
-      fetchBooks();
+      successMessage("Book successfully deleted");
     } catch (error) {
-      message.error("Помилка при видаленні книги");
+      errorMessage("Error deleting book");
     }
   };
 
-  const formatDateTime = (date: Date | null) => {
-    if (!date) return "--";
-    return format(date, "d MMMM yyyy, h:mma");
-  };
-
-  const columns = [
-    {
-      title: "Назва книги",
-      dataIndex: "title",
-      key: "title",
-    },
-    {
-      title: "Автор",
-      dataIndex: "author",
-      key: "author",
-    },
-    {
-      title: "Категорія",
-      dataIndex: "category",
-      key: "category",
-    },
-    {
-      title: "ISBN",
-      dataIndex: "isbn",
-      key: "isbn",
-    },
-    {
-      title: "Створено",
-      key: "createdAt",
-      render: (record: Book) => formatDateTime(record.createdAt),
-    },
-    {
-      title: "Відредаговано",
-      key: "editedAt",
-      render: (record: Book) => formatDateTime(record.editedAt),
-    },
-    {
-      title: "Дії",
-      key: "actions",
-      render: (record: Book) => (
-        <Space size="small">
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            onClick={() => navigate(`/edit-book/${record.id}`)}
-          >
-            Редагувати
-          </Button>
-
-          <Button
-            type={record.isActive ? "default" : "primary"}
-            icon={record.isActive ? <StopOutlined /> : <CheckCircleOutlined />}
-            onClick={() => handleToggleStatus(record.id)}
-          >
-            {record.isActive ? "Деактивувати" : "Активувати"}
-          </Button>
-
-          {!record.isActive && (
-            <Popconfirm
-              title="Ви впевнені, що хочете видалити цю книгу?"
-              onConfirm={() => handleDelete(record.id)}
-              okText="Так"
-              cancelText="Ні"
-            >
-              <Button danger icon={<DeleteOutlined />}>
-                Видалити
-              </Button>
-            </Popconfirm>
-          )}
-        </Space>
-      ),
-    },
-  ];
+  const columns = useColumns(handleToggleStatus, handleDelete);
 
   return (
     <div className={css.dashboardContainer}>
+      {contextHolder}
       <div className={css.header}>
-        <Title level={2}>Бібліотека книг</Title>
+        <Typography.Title className={css.title} level={2}>
+          <BookOutlined /> ReadJourney
+        </Typography.Title>
         <Link to="/add-book">
           <Button type="primary" icon={<PlusOutlined />} size="large">
-            Додати книгу
+            Add a book
           </Button>
         </Link>
       </div>
 
       <div className={css.filterContainer}>
-        <Space>
-          <span>Фільтр:</span>
-          <Select
-            value={filter}
-            onChange={handleFilterChange}
-            style={{ width: 150 }}
-          >
-            <Option value="all">Показати всі</Option>
-            <Option value="active">Показати активні</Option>
-            <Option value="deactivated">Показати деактивовані</Option>
-          </Select>
-          <span>
-            Показано {books.length} з {totalBooks} записів
-          </span>
-        </Space>
+        <span className={css.filterLabel}>
+          <FilterOutlined /> Filter:
+        </span>
+        <Select
+          value={filter}
+          onChange={handleFilterChange}
+          style={{ width: 150 }}
+        >
+          <Select.Option value="all">Show all</Select.Option>
+          <Select.Option value="active">Show active</Select.Option>
+          <Select.Option value="deactivated">Show disabled</Select.Option>
+        </Select>
+        <span className={css.statsInfo}>
+          <InfoCircleOutlined /> Shown {books.length} of {totalBooks} entries
+        </span>
       </div>
 
       <Table
+        className={css.table}
         dataSource={books}
         columns={columns}
         rowKey="id"
         loading={loading}
         pagination={{ pageSize: 10 }}
         rowClassName={(record) => (!record.isActive ? css.deactivatedRow : "")}
+        scroll={{ x: "max-content" }}
       />
     </div>
   );

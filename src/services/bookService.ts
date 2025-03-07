@@ -1,71 +1,120 @@
-import { Book } from "../types/Book";
+import { Book, BookData } from "../types/Book.ts";
 
-let books: Book[] = [
-  {
-    id: "1",
-    title: "Кобзар",
-    author: "Тарас Шевченко",
-    category: "Поезія",
-    isbn: "978-966-01-0000-9",
-    createdAt: new Date("2023-01-15T10:30:00"),
-    editedAt: new Date("2023-02-20T14:45:00"),
-    isActive: true,
-  },
-  {
-    id: "2",
-    title: "Лісова пісня",
-    author: "Леся Українка",
-    category: "Драма",
-    isbn: "978-966-01-0001-6",
-    createdAt: new Date("2023-03-10T09:15:00"),
+const API_URL = "http://localhost:3001/books";
+
+export const getAllBooks = async (): Promise<Book[]> => {
+  const response = await fetch(API_URL);
+  if (!response.ok) {
+    throw new Error("Error retrieving books");
+  }
+  return response.json();
+};
+
+export const getBookById = async (id: string): Promise<Book> => {
+  const response = await fetch(`${API_URL}/${id}`);
+  if (!response.ok) {
+    throw new Error("Error retrieving book");
+  }
+  return response.json();
+};
+
+export const createBook = async (bookData: BookData): Promise<Book> => {
+  const newBook = {
+    ...bookData,
+    id: Date.now().toString(),
+    createdAt: new Date().toISOString(),
     editedAt: null,
     isActive: true,
-  },
-  {
-    id: "3",
-    title: "Тигролови",
-    author: "Іван Багряний",
-    category: "Роман",
-    isbn: "978-966-01-0002-3",
-    createdAt: new Date("2023-02-05T16:20:00"),
-    editedAt: new Date("2023-04-12T11:30:00"),
-    isActive: false,
-  },
-];
-
-export const getAllBooks = (): Promise<Book[]> => {
-  return Promise.resolve([...books]);
-};
-
-export const getActiveBooks = (): Promise<Book[]> => {
-  return Promise.resolve(books.filter((book) => book.isActive));
-};
-
-export const getDeactivatedBooks = (): Promise<Book[]> => {
-  return Promise.resolve(books.filter((book) => !book.isActive));
-};
-
-export const toggleBookStatus = (id: string): Promise<Book> => {
-  const bookIndex = books.findIndex((book) => book.id === id);
-  if (bookIndex === -1) {
-    return Promise.reject(new Error("Книгу не знайдено"));
-  }
-
-  books[bookIndex] = {
-    ...books[bookIndex],
-    isActive: !books[bookIndex].isActive,
-    editedAt: new Date(),
   };
 
-  return Promise.resolve(books[bookIndex]);
-};
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(newBook),
+  });
 
-export const deleteBook = (id: string): Promise<void> => {
-  const bookIndex = books.findIndex((book) => book.id === id);
-  if (bookIndex === -1) {
-    return Promise.reject(new Error("Книгу не знайдено"));
+  if (!response.ok) {
+    throw new Error("Book creation error");
   }
 
-  books = books.filter((book) => book.id !== id);
-  return Promise.resolve();
+  return response.json();
+};
+
+export const updateBook = async (
+  id: string,
+  bookData: BookData
+): Promise<Book> => {
+  const currentBook = await getBookById(id);
+
+  const updatedBook = {
+    ...currentBook,
+    ...bookData,
+    editedAt: new Date().toISOString(),
+  };
+
+  const response = await fetch(`${API_URL}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updatedBook),
+  });
+
+  if (!response.ok) {
+    throw new Error("Book update error");
+  }
+
+  return response.json();
+};
+
+export const deleteBook = async (id: string): Promise<void> => {
+  const response = await fetch(`${API_URL}/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Error deleting book");
+  }
+};
+
+export const getActiveBooks = async (): Promise<Book[]> => {
+  const response = await fetch(`${API_URL}?isActive=true`);
+  if (!response.ok) {
+    throw new Error("Error retrieving active books");
+  }
+  return response.json();
+};
+
+export const getDeactivatedBooks = async (): Promise<Book[]> => {
+  const response = await fetch(`${API_URL}?isActive=false`);
+  if (!response.ok) {
+    throw new Error("Error retrieving deactivated books");
+  }
+  return response.json();
+};
+
+export const toggleBookStatus = async (id: string): Promise<Book> => {
+  const book = await getBookById(id);
+
+  const updatedBook = {
+    ...book,
+    isActive: !book.isActive,
+    editedAt: new Date().toISOString(),
+  };
+
+  const response = await fetch(`${API_URL}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updatedBook),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error changing book status");
+  }
+
+  return response.json();
 };

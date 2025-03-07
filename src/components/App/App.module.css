@@ -1,0 +1,9 @@
+.appContainer {
+  background-color: var(--primary-color);
+  min-height: 100vh;
+}
+
+.content {
+  padding: 20px;
+  flex: 1;
+}

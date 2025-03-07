@@ -8,3 +8,7 @@ export interface Book {
   editedAt: Date | null;
   isActive: boolean;
 }
+
+export type BookData = Omit<Book, "id" | "createdAt" | "editedAt" | "isActive">;
+
+export type FilterType = "all" | "active" | "deactivated";
