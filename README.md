@@ -3,17 +3,16 @@
 ReadJourney is a book list management application developed to manage a collection of books. It allows users to perform CRUD (Create, Read, Update, Delete) operations on the books in a simple and intuitive way. The application is built with a front-end in React and a back-end in json-server for data storage and management.
 
 ## 📋 Key Features and Functionality:
-
-**1. Dashboard Page:**
+1. Dashboard Page:**
     - **Table View:** Displays a list of books in a tabular format with details for each book.
     - **Filtering:** The user can filter the displayed books
     - **Pagination:** Books are listed with pagination, showing a limited number of records per page.
     - **Interactive Table:** Users can click the Edit button to modify a book, Deactivate it, or Delete a deactivated record.
-**2. Add/Edit Book Page:**
+2. Add/Edit Book Page:**
     - **Form for Book Details:** Users can either add a new book or edit an existing one.
     - **Validation:** Each input field is validated to ensure that no required fields are left empty.
     - **Submission:** Upon form submission, the new or updated book is saved, and the user is redirected to the Dashboard with the updated book list.
-**3. Responsive Design:**
+3. Responsive Design:**
     - The app is fully responsive, ensuring it works smoothly across different devices (from mobile phones to desktops).
 
 ## 🛠️ Technologies Used:
